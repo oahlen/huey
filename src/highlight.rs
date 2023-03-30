@@ -58,21 +58,21 @@ fn lookup_highlight(
 }
 
 fn parse_style_options(style: &str) -> Result<String, ThemeError> {
-    let mut style_options = String::new();
+    let mut style_options: Vec<String> = Vec::new();
 
     for option in style.chars() {
         match option {
-            'b' => style_options += "bold = true, ",
-            'i' => style_options += "italic = true, ",
-            'u' => style_options += "underline = true, ",
-            'c' => style_options += "undercurl = true, ",
-            'd' => style_options += "underdouble = true, ",
-            't' => style_options += "underdotted = true, ",
-            'h' => style_options += "underdashed = true, ",
-            'o' => style_options += "standout = true, ",
-            's' => style_options += "strikethrough = true, ",
-            'n' => style_options += "nocombine = true, ",
-            'r' => style_options += "reverse = true, ",
+            'b' => style_options.push(String::from("bold = true")),
+            'i' => style_options.push(String::from("italic = true")),
+            'u' => style_options.push(String::from("underline = true")),
+            'c' => style_options.push(String::from("undercurl = true")),
+            'd' => style_options.push(String::from("underdouble = true")),
+            't' => style_options.push(String::from("underdotted = true")),
+            'h' => style_options.push(String::from("underdashed = true")),
+            'o' => style_options.push(String::from("standout = true")),
+            's' => style_options.push(String::from("strikethrough = true")),
+            'n' => style_options.push(String::from("nocombine = true")),
+            'r' => style_options.push(String::from("reverse = true")),
             '-' => {}
             unknown => {
                 return Err(ThemeError::UnknownStyleOption {
@@ -82,6 +82,5 @@ fn parse_style_options(style: &str) -> Result<String, ThemeError> {
         }
     }
 
-    style_options.pop();
-    Ok(style_options)
+    Ok(style_options.join(", "))
 }
