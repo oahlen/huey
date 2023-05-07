@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, fs};
+use std::{collections::HashMap, fmt::Display, fs, path::Path};
 
 use regex::Regex;
 use serde::Deserialize;
@@ -6,11 +6,18 @@ use toml::Table;
 
 use crate::{
     color::{HslColor, RgbColor},
-    error::ThemeError,
+    error::{FileError, ThemeError},
     highlight::parse_highlight,
 };
 
 pub(crate) fn parse_theme(path: &str) -> Result<Theme, anyhow::Error> {
+    if !Path::new(path).exists() {
+        return Err(FileError::FileNotFound {
+            path: path.to_string(),
+        }
+        .into());
+    }
+
     Theme::new(toml::from_str(&fs::read_to_string(path)?)?)
 }
 

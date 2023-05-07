@@ -35,3 +35,9 @@ pub enum ThemeError {
     #[error("Unknown style option {option:?}")]
     UnknownStyleOption { option: String },
 }
+
+#[derive(thiserror::Error, Debug, PartialEq)]
+pub enum FileError {
+    #[error("File {path:?} not found")]
+    FileNotFound { path: String },
+}
