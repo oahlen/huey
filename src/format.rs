@@ -28,7 +28,6 @@ pub(crate) struct ParsedTheme {
     pub hues: Option<HashMap<String, f32>>,
     pub colors: Table,
     pub highlights: Table,
-    pub treesitter: Option<Table>,
 }
 
 pub(crate) fn lookup_rgb_color(
@@ -72,17 +71,6 @@ impl Theme {
                     highlights.push(parse_highlight(key, value, &palette)?);
                 }
                 None => return Err(ThemeError::MissingValue.into()),
-            }
-        }
-
-        if let Some(treesitter) = &parsed.treesitter {
-            for (key, value) in treesitter {
-                match value.as_str() {
-                    Some(value) => {
-                        highlights.push(parse_highlight(&format!("@{}", key), value, &palette)?);
-                    }
-                    None => return Err(ThemeError::MissingValue.into()),
-                }
             }
         }
 
