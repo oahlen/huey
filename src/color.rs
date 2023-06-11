@@ -69,9 +69,9 @@ impl HslColor {
         // Achromatic color
         if s == 0.0 {
             return RgbColor {
-                r: (l * 255.0).floor() as u8,
-                g: (l * 255.0).floor() as u8,
-                b: (l * 255.0).floor() as u8,
+                r: (l * 255.0).round() as u8,
+                g: (l * 255.0).round() as u8,
+                b: (l * 255.0).round() as u8,
             };
         }
 
@@ -112,9 +112,9 @@ impl HslColor {
         let b = hue_to_rgb(p, q, h - 1.0 / 3.0);
 
         RgbColor::new(
-            (r * 255.0).floor() as u8,
-            (g * 255.0).floor() as u8,
-            (b * 255.0).floor() as u8,
+            (r * 255.0).round() as u8,
+            (g * 255.0).round() as u8,
+            (b * 255.0).round() as u8,
         )
     }
 }
