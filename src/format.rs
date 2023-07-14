@@ -5,7 +5,7 @@ use serde::Deserialize;
 use toml::Table;
 
 use crate::{
-    color::{HslColor, RgbColor},
+    color::{mix, Color, HslColor, RgbColor},
     error::{FileError, ThemeError},
     highlight::parse_highlight,
 };
@@ -30,24 +30,12 @@ pub(crate) struct ParsedTheme {
     pub highlights: Table,
 }
 
-pub(crate) fn lookup_rgb_color(
+pub(crate) fn lookup_color<'a>(
     key: &str,
-    palette: &HashMap<String, HslColor>,
-) -> Result<RgbColor, ThemeError> {
+    palette: &'a HashMap<String, Box<dyn Color>>,
+) -> Result<&'a dyn Color, ThemeError> {
     match palette.contains_key(key) {
-        true => Ok(RgbColor::from(palette[key])),
-        false => Err(ThemeError::MissingColor {
-            color: key.to_string(),
-        }),
-    }
-}
-
-pub(crate) fn lookup_hsl_color(
-    key: &str,
-    palette: &HashMap<String, HslColor>,
-) -> Result<HslColor, ThemeError> {
-    match palette.contains_key(key) {
-        true => Ok(palette[key]),
+        true => Ok(palette[key].as_ref()),
         false => Err(ThemeError::MissingColor {
             color: key.to_string(),
         }),
@@ -82,14 +70,14 @@ impl Theme {
     }
 }
 
-fn parse_palette(input: &ParsedTheme) -> Result<HashMap<String, HslColor>, anyhow::Error> {
-    let mut palette = HashMap::new();
+fn parse_palette(input: &ParsedTheme) -> Result<HashMap<String, Box<dyn Color>>, anyhow::Error> {
+    let mut palette: HashMap<String, Box<dyn Color>> = HashMap::new();
 
     for (key, value) in &input.colors {
         match value.as_str() {
             Some(value) => {
                 if palette.contains_key(value) {
-                    palette.insert(key.to_string(), palette[value]);
+                    palette.insert(key.to_string(), palette[value].copy());
                 } else {
                     palette.insert(
                         key.to_string(),
@@ -106,21 +94,24 @@ fn parse_palette(input: &ParsedTheme) -> Result<HashMap<String, HslColor>, anyho
 
 fn parse_palette_entry(
     value: &str,
-    palette: &HashMap<String, HslColor>,
+    palette: &HashMap<String, Box<dyn Color>>,
     hues: &Option<HashMap<String, f32>>,
-) -> Result<HslColor, anyhow::Error> {
+) -> Result<Box<dyn Color>, anyhow::Error> {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"^(?i)(hsl|adjust|lighten|darken|mix)\((.*)\)$")
             .expect("Color format regex is invalid");
     }
 
     if value.starts_with('#') {
-        return Ok(RgbColor::parse_from_hex(value)?.into());
+        return Ok(Box::new(RgbColor::parse_from_hex(value)?));
     }
 
     match RE.captures(value) {
         Some(capture) => match capture[1].to_lowercase().as_str() {
-            "hsl" => parse_hsl_color(split_input(&capture[2], 3)?, hues),
+            "hsl" => Ok(Box::new(parse_hsl_color(
+                split_input(&capture[2], 3)?,
+                hues,
+            )?)),
             "adjust" => adjust_color(split_input(&capture[2], 3)?, palette),
             "lighten" => lighten_color(split_input(&capture[2], 2)?, palette),
             "darken" => darken_color(split_input(&capture[2], 2)?, palette),
@@ -181,36 +172,34 @@ fn parse_hsl_color(
 
 fn adjust_color(
     parts: Vec<&str>,
-    palette: &HashMap<String, HslColor>,
-) -> Result<HslColor, anyhow::Error> {
-    Ok(lookup_hsl_color(parts[0], palette)?
-        .adjust(parts[1].parse::<f32>()?, parts[2].parse::<f32>()?))
+    palette: &HashMap<String, Box<dyn Color>>,
+) -> Result<Box<dyn Color>, anyhow::Error> {
+    Ok(lookup_color(parts[0], palette)?.adjust(parts[1].parse::<f32>()?, parts[2].parse::<f32>()?))
 }
 
 fn lighten_color(
     parts: Vec<&str>,
-    palette: &HashMap<String, HslColor>,
-) -> Result<HslColor, anyhow::Error> {
-    Ok(lookup_hsl_color(parts[0], palette)?.lighten(parts[1].parse::<f32>()?))
+    palette: &HashMap<String, Box<dyn Color>>,
+) -> Result<Box<dyn Color>, anyhow::Error> {
+    Ok(lookup_color(parts[0], palette)?.lighten(parts[1].parse::<f32>()?))
 }
 
 fn darken_color(
     parts: Vec<&str>,
-    palette: &HashMap<String, HslColor>,
-) -> Result<HslColor, anyhow::Error> {
-    Ok(lookup_hsl_color(parts[0], palette)?.darken(parts[1].parse::<f32>()?))
+    palette: &HashMap<String, Box<dyn Color>>,
+) -> Result<Box<dyn Color>, anyhow::Error> {
+    Ok(lookup_color(parts[0], palette)?.darken(parts[1].parse::<f32>()?))
 }
 
 fn mix_colors(
     parts: Vec<&str>,
-    palette: &HashMap<String, HslColor>,
-) -> Result<HslColor, anyhow::Error> {
-    Ok(RgbColor::mix(
-        lookup_hsl_color(parts[0], palette)?.into(),
-        lookup_hsl_color(parts[1], palette)?.into(),
+    palette: &HashMap<String, Box<dyn Color>>,
+) -> Result<Box<dyn Color>, anyhow::Error> {
+    Ok(Box::new(mix(
+        lookup_color(parts[0], palette)?,
+        lookup_color(parts[1], palette)?,
         parts[2].parse::<f32>()?,
-    )?
-    .into())
+    )?) as Box<dyn Color>)
 }
 
 #[derive(Debug)]

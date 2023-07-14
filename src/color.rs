@@ -3,11 +3,68 @@ use std::fmt;
 
 use crate::error::{HslColorError, RgbColorError};
 
+pub trait Color: fmt::Display {
+    fn adjust(&self, saturation: f32, lightness: f32) -> Box<dyn Color>;
+    fn lighten(&self, amount: f32) -> Box<dyn Color>;
+    fn darken(&self, amount: f32) -> Box<dyn Color>;
+    fn hex(&self) -> String;
+    fn copy(&self) -> Box<dyn Color>;
+    fn to_rgb(&self) -> RgbColor;
+}
+
+pub(crate) fn mix<'a>(
+    color1: &'a dyn Color,
+    color2: &'a dyn Color,
+    weight: f32,
+) -> Result<RgbColor, RgbColorError> {
+    if !(0.0..=1.0).contains(&weight) {
+        return Err(RgbColorError::Mix { found: weight });
+    }
+
+    let c1 = color1.to_rgb();
+    let c2 = color2.to_rgb();
+
+    let w1 = weight;
+    let w2 = 1.0 - weight;
+
+    Ok(RgbColor::new(
+        (c1.r as f32 * w1 + c2.r as f32 * w2) as u8,
+        (c1.g as f32 * w1 + c2.g as f32 * w2) as u8,
+        (c1.b as f32 * w1 + c2.b as f32 * w2) as u8,
+    ))
+}
+
 #[derive(Debug, Copy, Clone)]
-pub(crate) struct HslColor {
+pub struct HslColor {
     hue: f32,
     saturation: f32,
     lightness: f32,
+}
+
+impl Color for HslColor {
+    fn adjust(&self, saturation: f32, lightness: f32) -> Box<dyn Color> {
+        Box::new(self.adjust(saturation, lightness))
+    }
+
+    fn lighten(&self, amount: f32) -> Box<dyn Color> {
+        Box::new(self.lighten(amount))
+    }
+
+    fn darken(&self, amount: f32) -> Box<dyn Color> {
+        Box::new(self.darken(amount))
+    }
+
+    fn hex(&self) -> String {
+        self.to_rgb_color().to_string()
+    }
+
+    fn copy(&self) -> Box<dyn Color> {
+        Box::new(*self)
+    }
+
+    fn to_rgb(&self) -> RgbColor {
+        self.to_rgb_color()
+    }
 }
 
 impl HslColor {
@@ -138,10 +195,36 @@ impl fmt::Display for HslColor {
 }
 
 #[derive(Debug, Copy, Clone)]
-pub(crate) struct RgbColor {
+pub struct RgbColor {
     r: u8,
     g: u8,
     b: u8,
+}
+
+impl Color for RgbColor {
+    fn adjust(&self, saturation: f32, lightness: f32) -> Box<dyn Color> {
+        Box::new(self.to_hsl_color().adjust(saturation, lightness))
+    }
+
+    fn lighten(&self, amount: f32) -> Box<dyn Color> {
+        Box::new(self.to_hsl_color().lighten(amount))
+    }
+
+    fn darken(&self, amount: f32) -> Box<dyn Color> {
+        Box::new(self.to_hsl_color().darken(amount))
+    }
+
+    fn hex(&self) -> String {
+        self.to_string()
+    }
+
+    fn copy(&self) -> Box<dyn Color> {
+        Box::new(*self)
+    }
+
+    fn to_rgb(&self) -> RgbColor {
+        *self
+    }
 }
 
 impl RgbColor {
@@ -170,25 +253,6 @@ impl RgbColor {
             }
             .into()),
         }
-    }
-
-    pub(crate) fn mix(
-        color1: RgbColor,
-        color2: RgbColor,
-        weight: f32,
-    ) -> Result<RgbColor, RgbColorError> {
-        if !(0.0..=1.0).contains(&weight) {
-            return Err(RgbColorError::Mix { found: weight });
-        }
-
-        let w1 = weight;
-        let w2 = 1.0 - weight;
-
-        Ok(RgbColor::new(
-            (color1.r as f32 * w1 + color2.r as f32 * w2) as u8,
-            (color1.g as f32 * w1 + color2.g as f32 * w2) as u8,
-            (color1.b as f32 * w1 + color2.b as f32 * w2) as u8,
-        ))
     }
 
     fn to_hsl_color(self) -> HslColor {

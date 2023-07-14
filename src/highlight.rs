@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use crate::{color::HslColor, error::ThemeError, format::lookup_rgb_color};
+use crate::{color::Color, error::ThemeError, format::lookup_color};
 
 pub(crate) fn parse_highlight(
     hl_group: &str,
     value: &str,
-    palette: &HashMap<String, HslColor>,
+    palette: &HashMap<String, Box<dyn Color>>,
 ) -> Result<String, ThemeError> {
     let values = value
         .split(' ')
@@ -49,11 +49,11 @@ pub(crate) fn parse_highlight(
 
 fn lookup_highlight(
     value: &str,
-    palette: &HashMap<String, HslColor>,
+    palette: &HashMap<String, Box<dyn Color>>,
 ) -> Result<String, ThemeError> {
     match value {
         "-" => Ok("NONE".to_string()),
-        _ => Ok(lookup_rgb_color(value, palette)?.to_string()),
+        _ => Ok(lookup_color(value, palette)?.hex()),
     }
 }
 
