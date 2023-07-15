@@ -12,9 +12,9 @@ pub trait Color: fmt::Display {
     fn to_rgb(&self) -> RgbColor;
 }
 
-pub(crate) fn mix<'a>(
-    color1: &'a dyn Color,
-    color2: &'a dyn Color,
+pub(crate) fn mix(
+    color1: & dyn Color,
+    color2: & dyn Color,
     weight: f32,
 ) -> Result<RgbColor, RgbColorError> {
     if !(0.0..=1.0).contains(&weight) {
