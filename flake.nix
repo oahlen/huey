@@ -1,5 +1,5 @@
 {
-  description = "A Nix-flake-based Rust development environment";
+  description = "Neovim lua color scheme generator written in Rust";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/release-23.05";
