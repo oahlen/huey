@@ -8,6 +8,34 @@ Huey makes it easy to create a minimal lua based neovim colorscheme with
 The project takes inspiration from [colorgen-nvim](https://github.com/LunarVim/colorgen-nvim) and borrows some of the
 data format semantics in the theme file but also enhanches it with HSL based functions.
 
+## Build project
+
+The project is written in Rust and therefore built with cargo. To build and install the program locally run the following
+commands:
+
+```bash
+cargo build
+cargo install --path .
+```
+
+The project also comes with a nix flake which provides an appropriate development environment and build hook. Experience
+with nix and a flake enabled nix installation are of course required for this option.
+
+Enter dev shell:
+
+```bash
+nix develop
+```
+
+Build the default huey nix package:
+
+```bash
+nix build
+```
+
+## Basic usage
+
+
 ## File format
 
 Theme files are written in the toml format and contains the following sections:
@@ -18,11 +46,11 @@ Theme files are written in the toml format and contains the following sections:
 
 ## Functions
 
-The following functions are avaiable in the `colors` section:
+The following functions are available in the `colors` section:
 
 ### hsl(hue, saturation, lightness)
 
-Takes a hue value (0-360), saturation value (0-1.0) and a ligtness value (0-1.0) and creates a color variable.
+Takes a hue value (0-360), saturation value (0-1.0) and a lightness value (0-1.0) and creates a color variable.
 The hue value can use a variable from the `[hues]` section with the `$` symbol.
 
 ### adjust(existing-color, saturation, lightness)
@@ -53,14 +81,14 @@ with HSL.
 
 ## Highlights section
 
-The format is very similar to colorgen-nvim:
+The format is very similar to **colorgen-nvim**:
 
 * `foreground background style special`
 * `link:<name of hl group>`
 
 The '-' is used to skip a particular section and replace it with NONE
 
-The style otions are the following:
+The style options are the following:
 
 * o: standout
 * u: underline
