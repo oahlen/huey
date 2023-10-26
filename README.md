@@ -35,10 +35,16 @@ nix build
 
 ## Basic usage
 
+The program requires a theme file and an optional positional argument for the output directory of the lua files:
+The following command generates a theme in the current working directory:
+
+```bash
+huey /path/to/my/awesome/theme.toml .
+```
 
 ## File format
 
-Theme files are written in the toml format and contains the following sections:
+Theme files are written in the [toml](https://toml.io/en/) format and contains the following sections:
 
 * [hues] - dictionary of base hues to use in your colorscheme, can be referenced as variables in later sections
 * [colors] - dictionary of colors to use in your colorscheme, can be created and manipulated with HSL based functions
