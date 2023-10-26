@@ -43,8 +43,8 @@ delta.
 
 ### mix(color1, color2, weight)
 
-Mixes two existing colors into a new one based on weight. The weight is relative to the first color: 1.0 just returns the
-first color, 0.5 return a 50/50 mix of the two colors, 0.0 just returns the second color.
+Mixes two existing colors into a new one based ona  weight. The weight is relative to the first color: 1.0 just returns
+the first color, 0.5 return a 50/50 mix of the two colors, 0.0 just returns the second color.
 
 ### Regular hex color
 
@@ -75,6 +75,8 @@ The style otions are the following:
 * n: nocombine
 
 ## Example theme file
+
+Full colorscheme example can be found [here](https://github.com/oahlen/iceberg.nvim)
 
 ```toml
 name = "iceberg"
