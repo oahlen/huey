@@ -2,7 +2,7 @@
   description = "Neovim lua color scheme generator written in Rust";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/release-23.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-23.11";
 
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
