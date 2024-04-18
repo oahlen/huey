@@ -47,7 +47,7 @@ pub(crate) struct Theme {
     pub name: String,
     pub background: Background,
     pub highlights: Vec<String>,
-    pub globals: HashMap<String, String>,
+    pub globals: Vec<String>,
 }
 
 impl Theme {
@@ -64,15 +64,18 @@ impl Theme {
             }
         }
 
-        let mut globals: HashMap<String, String> = HashMap::new();
+        let mut globals: Vec<String> = Vec::new();
 
         for (key, value) in &parsed.globals {
             match value.as_str() {
                 Some(value) => {
-                    globals.insert(
-                        key.to_string(),
-                        parse_palette_entry(value, &palette, &parsed.hues)?.hex(),
-                    );
+                    let color = if palette.contains_key(value) {
+                        palette[value].hex()
+                    } else {
+                        parse_palette_entry(value, &palette, &parsed.hues)?.hex()
+                    };
+
+                    globals.push(format!("    vim.g.{key} = \"{color}\"\n"));
                 }
                 None => return Err(ThemeError::MissingValue.into()),
             }
