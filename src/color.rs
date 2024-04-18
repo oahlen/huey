@@ -13,8 +13,8 @@ pub trait Color: fmt::Display {
 }
 
 pub(crate) fn mix(
-    color1: & dyn Color,
-    color2: & dyn Color,
+    color1: &dyn Color,
+    color2: &dyn Color,
     weight: f32,
 ) -> Result<RgbColor, RgbColorError> {
     if !(0.0..=1.0).contains(&weight) {

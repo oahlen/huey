@@ -136,14 +136,12 @@ function M.init()
 
 fn write_end(writer: &mut LineWriter<File>) -> Result<(), anyhow::Error> {
     Ok(writer.write_all(
-        format!(
-            "
+        "
 
     set_hl_groups()
 end
 
 return M\n"
-        )
-        .as_bytes(),
+            .as_bytes(),
     )?)
 }
