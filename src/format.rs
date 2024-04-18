@@ -69,7 +69,10 @@ impl Theme {
         for (key, value) in &parsed.globals {
             match value.as_str() {
                 Some(value) => {
-                    globals.insert(key.to_string(), lookup_color(value, &palette)?.hex());
+                    globals.insert(
+                        key.to_string(),
+                        parse_palette_entry(value, &palette, &parsed.hues)?.hex(),
+                    );
                 }
                 None => return Err(ThemeError::MissingValue.into()),
             }
