@@ -172,4 +172,8 @@ Directory        = "blue - b" # bold
 "@constant.builtin"      = "link:Constant"
 "@constant"              = "link:Constant"
 "@constant.macro"        = "link:Constant"
+
+[globals]
+terminal_color_0 = "blue"
+terminal_color_1 = "darken(green, 0.1)"
 ```
