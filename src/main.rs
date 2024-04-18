@@ -77,24 +77,42 @@ fn generate_vim_colors_file(output: &str, name: &str) -> Result<(), anyhow::Erro
 
 fn generate_init(output: &str, theme: Theme) -> Result<(), anyhow::Error> {
     let name = &theme.name;
-    let background = &theme.background;
 
     let file = File::create(format!("{output}/lua/{name}/init.lua"))?;
-    let mut file = LineWriter::new(file);
+    let mut writer = LineWriter::new(file);
 
-    file.write_all(
+    write_set_highlight_groups_func(&mut writer)?;
+
+    for highlight in &theme.highlights {
+        writer.write_all(highlight.as_bytes())?;
+    }
+
+    write_init_func(&mut writer, &theme)?;
+
+    for (key, value) in &theme.globals {
+        writer.write_all(format!("    vim.g.{key} = \"{value}\"").as_bytes())?;
+    }
+
+    write_end(&mut writer)?;
+
+    Ok(())
+}
+
+fn write_set_highlight_groups_func(writer: &mut LineWriter<File>) -> Result<(), anyhow::Error> {
+    Ok(writer.write_all(
         b"local M = {}
 
 local function set_hl_groups()
     local hl = vim.api.nvim_set_hl
 ",
-    )?;
+    )?)
+}
 
-    for highlight in &theme.highlights {
-        file.write_all(highlight.as_bytes())?;
-    }
+fn write_init_func(writer: &mut LineWriter<File>, theme: &Theme) -> Result<(), anyhow::Error> {
+    let name = &theme.name;
+    let background = &theme.background;
 
-    file.write_all(
+    Ok(writer.write_all(
         format!(
             "
 end
@@ -110,13 +128,22 @@ function M.init()
     vim.o.termguicolors = true
     vim.g.colors_name = \"{name}\"
 
+"
+        )
+        .as_bytes(),
+    )?)
+}
+
+fn write_end(writer: &mut LineWriter<File>) -> Result<(), anyhow::Error> {
+    Ok(writer.write_all(
+        format!(
+            "
+
     set_hl_groups()
 end
 
 return M\n"
         )
         .as_bytes(),
-    )?;
-
-    Ok(())
+    )?)
 }

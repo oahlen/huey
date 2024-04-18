@@ -28,6 +28,7 @@ pub(crate) struct ParsedTheme {
     pub hues: Option<HashMap<String, f32>>,
     pub colors: Table,
     pub highlights: Table,
+    pub globals: Table,
 }
 
 pub(crate) fn lookup_color<'a>(
@@ -46,6 +47,7 @@ pub(crate) struct Theme {
     pub name: String,
     pub background: Background,
     pub highlights: Vec<String>,
+    pub globals: HashMap<String, String>,
 }
 
 impl Theme {
@@ -62,10 +64,22 @@ impl Theme {
             }
         }
 
+        let mut globals: HashMap<String, String> = HashMap::new();
+
+        for (key, value) in &parsed.globals {
+            match value.as_str() {
+                Some(value) => {
+                    globals.insert(key.to_string(), lookup_color(value, &palette)?.hex());
+                }
+                None => return Err(ThemeError::MissingValue.into()),
+            }
+        }
+
         Ok(Theme {
             name: parsed.name,
             background: Background::new(&parsed.background)?,
             highlights,
+            globals,
         })
     }
 }

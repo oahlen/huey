@@ -46,9 +46,11 @@ huey /path/to/my/awesome/theme.toml .
 
 Theme files are written in the [toml](https://toml.io/en/) format and contains the following sections:
 
-* [hues] - dictionary of base hues to use in your colorscheme, can be referenced as variables in later sections
-* [colors] - dictionary of colors to use in your colorscheme, can be created and manipulated with HSL based functions
-* [highlights] - dictionary of the final nvim highlights, references the colors in the previous sections
+* [**hues**] - dictionary of base hues to use in your colorscheme, can be referenced as variables in later sections
+* [**colors**] - dictionary of colors to use in your colorscheme, can be created and manipulated with HSL based functions
+* [**highlights**] - dictionary of the final nvim highlights, references the colors in the previous sections
+* [**globals**] - dictionary of the color variables to be inserted under *vim.g...*, references the colors in the previous sections, i.e. not highlights
+  * This section is useful for setting the colors of the integrated Neovim terminal: `terminal_color_0 = "my_terminal_color"`
 
 ## Functions
 
