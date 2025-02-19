@@ -79,7 +79,7 @@ delta.
 
 ### mix(color1, color2, weight)
 
-Mixes two existing colors into a new one based ona  weight. The weight is relative to the first color: 1.0 just returns
+Mixes two existing colors into a new one based on a weight. The weight is relative to the first color: 1.0 just returns
 the first color, 0.5 return a 50/50 mix of the two colors, 0.0 just returns the second color.
 
 ### Regular hex color
