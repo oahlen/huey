@@ -2,32 +2,24 @@
   description = "Neovim lua color scheme generator written in Rust";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/release-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-24.11";
 
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
+      inputs. nixpkgs.follows = "nixpkgs";
     };
 
-    crane = {
-      url = "github:ipetkov/crane";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
+    crane. url = "github:ipetkov/crane";
 
     flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = {
-    self,
     nixpkgs,
     rust-overlay,
     crane,
     flake-utils,
+    ...
   }:
     flake-utils.lib.eachDefaultSystem (system: let
       overlays = [(import rust-overlay)];
@@ -47,31 +39,15 @@
         inherit src buildInputs nativeBuildInputs;
       };
 
-      cargoArtifacts = craneLib.buildDepsOnly commonArgs;
-
       bin = craneLib.buildPackage (commonArgs
         // {
-          inherit cargoArtifacts;
+          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
         });
-
-      dockerImage = pkgs.dockerTools.buildLayeredImage {
-        name = "huey";
-        tag = "latest";
-
-        contents = [bin];
-
-        config = {
-          Cmd = ["${bin}/bin/huey"];
-        };
-      };
     in
       with pkgs; {
-        packages = {
-          inherit bin dockerImage;
-          default = bin;
-        };
+        packages. default = bin;
 
-        devShells.default = pkgs.mkShell {
+        devShells.default = mkShell {
           inputsFrom = [bin];
           buildInputs = [rust-analyzer];
         };
