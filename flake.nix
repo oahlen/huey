@@ -51,7 +51,8 @@
           inputsFrom = [bin];
           buildInputs = [rust-analyzer];
         };
-
-        inherit nixpkgs;
-      });
+      })
+    // {
+      inherit nixpkgs;
+    };
 }
