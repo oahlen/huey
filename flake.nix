@@ -6,10 +6,10 @@
 
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs. nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    crane. url = "github:ipetkov/crane";
+    crane.url = "github:ipetkov/crane";
 
     flake-utils.url = "github:numtide/flake-utils";
   };
@@ -45,11 +45,13 @@
         });
     in
       with pkgs; {
-        packages. default = bin;
+        packages.default = bin;
 
         devShells.default = mkShell {
           inputsFrom = [bin];
           buildInputs = [rust-analyzer];
         };
+
+        inherit nixpkgs;
       });
 }
