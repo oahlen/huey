@@ -309,3 +309,77 @@ impl fmt::Display for RgbColor {
         write!(f, "#{:02x}{:02x}{:02x}", self.r, self.g, self.b)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hsl_color_new() {
+        let hsl = HslColor::new(120.0, 0.5, 0.5).unwrap();
+        assert_eq!(hsl.hue, 120.0 / 360.0);
+        assert_eq!(hsl.saturation, 0.5);
+        assert_eq!(hsl.lightness, 0.5);
+    }
+
+    #[test]
+    fn test_hsl_color_adjust() {
+        let hsl = HslColor::new(120.0, 0.5, 0.5).unwrap();
+        let adjusted = hsl.adjust(0.2, 0.1);
+        assert_eq!(adjusted.saturation, 0.7);
+        assert_eq!(adjusted.lightness, 0.6);
+    }
+
+    #[test]
+    fn test_hsl_color_adjust_clamped() {
+        let hsl = HslColor::new(120.0, 0.5, 0.5).unwrap();
+        let adjusted = hsl.adjust(0.6, -0.6);
+        assert_eq!(adjusted.saturation, 1.0);
+        assert_eq!(adjusted.lightness, 0.0);
+    }
+
+    #[test]
+    fn test_hsl_color_lighten() {
+        let hsl = HslColor::new(120.0, 0.5, 0.5).unwrap();
+        let lightened = hsl.lighten(0.2);
+        assert_eq!(lightened.lightness, 0.7);
+    }
+
+    #[test]
+    fn test_hsl_color_darken() {
+        let hsl = HslColor::new(120.0, 0.5, 0.5).unwrap();
+        let darkened = hsl.darken(0.2);
+        assert_eq!(darkened.lightness, 0.3);
+    }
+
+    #[test]
+    fn test_hsl_to_rgb() {
+        assert_eq!(
+            "#161822",
+            HslColor::new(230.0, 0.2, 0.11).unwrap().to_rgb().hex()
+        );
+        assert_eq!(
+            "#ff0000",
+            HslColor::new(0.0, 1.0, 0.50).unwrap().to_rgb().hex()
+        );
+        assert_eq!(
+            "#ff0000",
+            HslColor::new(360.0, 1.0, 0.50).unwrap().to_rgb().hex()
+        );
+        assert_eq!(
+            "#ffffff",
+            HslColor::new(360.0, 1.0, 1.00).unwrap().to_rgb().hex()
+        );
+    }
+
+    #[test]
+    fn test_rgb_to_hsl() {
+        let rgb = RgbColor::parse_from_hex("#40bf40").unwrap();
+        let hsl = HslColor::from(rgb);
+
+        assert_eq!(rgb.hex(), hsl.hex());
+        assert!((hsl.hue - 120.0 / 360.0).abs() < 0.01);
+        assert!((hsl.saturation - 0.5).abs() < 0.01);
+        assert!((hsl.lightness - 0.5).abs() < 0.01);
+    }
+}
