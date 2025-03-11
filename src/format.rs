@@ -1,5 +1,6 @@
 use std::{collections::HashMap, fmt::Display, fs, path::Path};
 
+use indexmap::IndexMap;
 use regex::Regex;
 use serde::Deserialize;
 use toml::Table;
@@ -33,7 +34,7 @@ pub(crate) struct ParsedTheme {
 
 pub(crate) fn lookup_color<'a>(
     key: &str,
-    palette: &'a HashMap<String, Box<dyn Color>>,
+    palette: &'a IndexMap<String, Box<dyn Color>>,
 ) -> Result<&'a dyn Color, ThemeError> {
     match palette.contains_key(key) {
         true => Ok(palette[key].as_ref()),
@@ -46,6 +47,7 @@ pub(crate) fn lookup_color<'a>(
 pub(crate) struct Theme {
     pub name: String,
     pub background: Background,
+    pub palette: IndexMap<String, Box<dyn Color>>,
     pub highlights: Vec<String>,
     pub globals: Vec<String>,
 }
@@ -84,14 +86,15 @@ impl Theme {
         Ok(Theme {
             name: parsed.name,
             background: Background::new(&parsed.background)?,
+            palette,
             highlights,
             globals,
         })
     }
 }
 
-fn parse_palette(input: &ParsedTheme) -> Result<HashMap<String, Box<dyn Color>>, anyhow::Error> {
-    let mut palette: HashMap<String, Box<dyn Color>> = HashMap::new();
+fn parse_palette(input: &ParsedTheme) -> Result<IndexMap<String, Box<dyn Color>>, anyhow::Error> {
+    let mut palette: IndexMap<String, Box<dyn Color>> = IndexMap::new();
 
     for (key, value) in &input.colors {
         match value.as_str() {
@@ -114,7 +117,7 @@ fn parse_palette(input: &ParsedTheme) -> Result<HashMap<String, Box<dyn Color>>,
 
 fn parse_palette_entry(
     value: &str,
-    palette: &HashMap<String, Box<dyn Color>>,
+    palette: &IndexMap<String, Box<dyn Color>>,
     hues: &Option<HashMap<String, f32>>,
 ) -> Result<Box<dyn Color>, anyhow::Error> {
     lazy_static! {
@@ -192,28 +195,28 @@ fn parse_hsl_color(
 
 fn adjust_color(
     parts: Vec<&str>,
-    palette: &HashMap<String, Box<dyn Color>>,
+    palette: &IndexMap<String, Box<dyn Color>>,
 ) -> Result<Box<dyn Color>, anyhow::Error> {
     Ok(lookup_color(parts[0], palette)?.adjust(parts[1].parse::<f32>()?, parts[2].parse::<f32>()?))
 }
 
 fn lighten_color(
     parts: Vec<&str>,
-    palette: &HashMap<String, Box<dyn Color>>,
+    palette: &IndexMap<String, Box<dyn Color>>,
 ) -> Result<Box<dyn Color>, anyhow::Error> {
     Ok(lookup_color(parts[0], palette)?.lighten(parts[1].parse::<f32>()?))
 }
 
 fn darken_color(
     parts: Vec<&str>,
-    palette: &HashMap<String, Box<dyn Color>>,
+    palette: &IndexMap<String, Box<dyn Color>>,
 ) -> Result<Box<dyn Color>, anyhow::Error> {
     Ok(lookup_color(parts[0], palette)?.darken(parts[1].parse::<f32>()?))
 }
 
 fn mix_colors(
     parts: Vec<&str>,
-    palette: &HashMap<String, Box<dyn Color>>,
+    palette: &IndexMap<String, Box<dyn Color>>,
 ) -> Result<Box<dyn Color>, anyhow::Error> {
     Ok(Box::new(mix(
         lookup_color(parts[0], palette)?,

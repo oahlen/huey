@@ -9,6 +9,7 @@ homepage = "https://github.com/oahlen/huey"
 [dependencies]
 anyhow = "=1.0.96"
 clap = { version = "=4.5.30", features = ["derive"] }
+indexmap = "2.7.1"
 lazy_static = "=1.5.0"
 libmath = "=0.2.1"
 regex = "=1.11.1"
