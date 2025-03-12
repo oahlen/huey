@@ -7,11 +7,11 @@ description = "Neovim lua color scheme generator written in Rust"
 homepage = "https://github.com/oahlen/huey"
 
 [dependencies]
-anyhow = "=1.0.96"
-clap = { version = "=4.5.30", features = ["derive"] }
+anyhow = "=1.0.97"
+clap = { version = "=4.5.32", features = ["derive"] }
 indexmap = "2.7.1"
 lazy_static = "=1.5.0"
 regex = "=1.11.1"
-serde = { version = "=1.0.218", features = ["derive"] }
-thiserror = "=2.0.11"
+serde = { version = "=1.0.219", features = ["derive"] }
+thiserror = "=2.0.12"
 toml = { version = "=0.8.20", features = ["preserve_order"] }
